@@ -4,8 +4,6 @@ from torch import nn
 import pandas as pd
 import requests
 from PIL import Image
-from crowdkit.aggregation import MajorityVote
-from sklearn.model_selection import GroupShuffleSplit
 from tqdm.auto import tqdm
 import random
 import numpy as np

@@ -5,23 +5,13 @@ import numpy as np
 import torch
 from PIL import Image
 from sklearn.metrics import f1_score, classification_report
-from sklearn.model_selection import GroupShuffleSplit
 from sklearn.preprocessing import LabelEncoder
-from torch import nn
-import torchvision
 import pytorch_lightning as pl
-import requests
-from torchmetrics import F1
-from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
 from torchvision import transforms
-from transformers import ViTForImageClassification, ViTFeatureExtractor, get_linear_schedule_with_warmup, get_constant_schedule_with_warmup
-from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 import timm
 from tqdm.auto import tqdm
 from matplotlib import pyplot as plt
-from crowdkit.aggregation import DawidSkene, MajorityVote
-# from honeypots_ml.utils import factorize_column
 
 default_train_transforms = transforms.Compose(
     [
