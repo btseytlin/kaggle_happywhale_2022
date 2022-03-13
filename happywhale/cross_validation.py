@@ -1,14 +1,13 @@
-from typing import NamedTuple
 
+from typing import NamedTuple, List
 import numpy as np
-from numpy.typing import NDArray
 from sklearn.model_selection import StratifiedKFold, train_test_split
 
 
 class CVSplit(NamedTuple):
-    train: NDArray
-    val: NDArray
-    test: NDArray
+    train: List
+    val: List
+    test: List
 
 
 def get_cv_splits(train_df,
@@ -24,9 +23,9 @@ def get_cv_splits(train_df,
 
         splits.append(
             CVSplit(
-                train=train_index,
-                val=val_index,
-                test=test_index,
+                train=list(train_index),
+                val=list(val_index),
+                test=list(test_index),
             )
         )
 
