@@ -27,36 +27,6 @@ def batch_to_device(batch, device):
     return batch
 
 
-def split_tsv(df,
-             val_size=0.1,
-             test_size=0.2):
-    splitter = GroupShuffleSplit(n_splits=1, test_size=test_size)
-    train_idx, test_idx = next(splitter.split(df, df['label'], df['task']))
-    train_df = df.iloc[train_idx]
-    test_df = df.iloc[test_idx]
-
-    test_labels = MajorityVote().fit_predict(test_df)
-    test_df = pd.DataFrame({'task': test_labels.index, 'label': test_labels.values})
-
-    assert set(train_df.task).intersection(test_df.task) == set()
-
-    if val_size:
-        splitter_val = GroupShuffleSplit(n_splits=1, test_size=val_size)
-        train_idx, val_idx = next(splitter_val.split(train_df, train_df['label'], train_df['task']))
-
-        val_df = train_df.iloc[val_idx]
-        train_df = train_df.iloc[train_idx]
-        val_labels = MajorityVote().fit_predict(val_df)
-        val_df = pd.DataFrame({'task': val_labels.index, 'label': val_labels.values})
-
-        assert set(train_df.task).intersection(val_df.task) == set()
-        assert set(val_df.task).intersection(test_df.task) == set()
-
-        return train_df, val_df, test_df
-
-    return train_df, test_df
-
-
 def seed_torch(seed_value):
     random.seed(seed_value) # Python
     np.random.seed(seed_value) # cpu vars
