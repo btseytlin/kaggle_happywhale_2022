@@ -3,13 +3,8 @@ import torch
 from torch import nn
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
-from pytorch_lightning import loggers as pl_loggers
 from torchmetrics.functional.classification import accuracy
 from transformers import get_linear_schedule_with_warmup
-
-from pytorch_lightning import Callback
-import copy
-from time import sleep
 from pytorch_lightning.loggers import WandbLogger
 from happywhale.utils import get_mlp
 
@@ -26,7 +21,6 @@ class Classifier(pl.LightningModule):
                  dropout=0.1,
                  class_weights=None,
                  trainer_kwargs=None,
-                 exp_name=None,
                  **kwargs):
         super().__init__()
         self.lr = lr
@@ -46,9 +40,7 @@ class Classifier(pl.LightningModule):
         weight = torch.FloatTensor(self.class_weights) if self.class_weights is not None else None
         self.loss = nn.CrossEntropyLoss(weight=weight)
 
-        self.wandb_logger = WandbLogger(name=exp_name,
-                                        project="kaggle_happy_whale",
-                                        log_model=True)
+        self.wandb_logger = WandbLogger(log_model=True)
 
         trainer_kwargs = trainer_kwargs or {}
         trainer_kwargs.update(kwargs)
@@ -89,6 +81,7 @@ class Classifier(pl.LightningModule):
             num_training_steps=self.num_training_steps,
             num_labels=self.num_labels,
             class_weights=self.class_weights,
+            wandb_logger=self.wandb_logger,
             strict=False,
         )
 
@@ -104,7 +97,6 @@ class Classifier(pl.LightningModule):
         return self
 
     def fit(self, datamodule):
-        # self.wandb_logger.watch(self, log="all")
         self.trainer.fit(self, datamodule)
         try:
             return self.load_best_checkopoint()
