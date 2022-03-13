@@ -105,8 +105,8 @@ class Classifier(pl.LightningModule):
             print('WARNING: Couldn\'t load best checkpoint')
             return self
 
-    def test(self):
-        test_results = self.trainer.test(self)
+    def test(self, datamodule):
+        test_results = self.trainer.test(self, datamodule=datamodule)
         return test_results
 
     def configure_optimizers(self):
