@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import torch
 from PIL import Image
+from pytorch_metric_learning.samplers import MPerClassSampler
 from sklearn.metrics import f1_score, classification_report
 from sklearn.preprocessing import LabelEncoder
 import pytorch_lightning as pl
@@ -64,6 +65,7 @@ class ImageDataMoodule(pl.LightningDataModule):
         test_transforms=None,
         batch_size=32,
         num_workers=4,
+        sampler=None,
         **kwargs,
     ):
         super().__init__()
@@ -74,11 +76,13 @@ class ImageDataMoodule(pl.LightningDataModule):
         all_individual_ids = pd.concat([train_df, val_df, test_df]).individual_id.values
         self.label_encoder = LabelEncoder().fit(all_individual_ids)
 
-        self.batch_size = batch_size
-        self.num_workers = num_workers
-
         self.train_transforms = train_transforms or default_train_transforms
         self.test_transforms = test_transforms or default_test_transforms
+
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.sampler = sampler
+        self.sampler_m_per_class = 4
 
         self.train = None
         self.val = None
@@ -107,13 +111,29 @@ class ImageDataMoodule(pl.LightningDataModule):
                 transform=self.test_transforms,
             )
 
-    def train_dataloader(self):
+    def _loader_m_per_class(self, dataset):
+        sampler = MPerClassSampler(
+            labels=dataset.labels,
+            m=self.sampler_m_per_class,
+        )
+        return DataLoader(dataset,
+                          batch_size=self.batch_size,
+                          num_workers=self.num_workers,
+                          sampler=sampler)
+
+    def train_dataloader(self, sampler=None):
+        if self.sampler == 'm_per_class':
+            return self._loader_m_per_class(self.train)
+
         return DataLoader(self.train,
                           batch_size=self.batch_size,
                           num_workers=self.num_workers,
                           shuffle=True)
 
     def val_dataloader(self):
+        if self.sampler == 'm_per_class':
+            return self._loader_m_per_class(self.val)
+
         return DataLoader(self.val,
                           batch_size=self.batch_size,
                           num_workers=self.num_workers,

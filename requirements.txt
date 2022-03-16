@@ -7,3 +7,4 @@ hyperopt==0.2.5
 timm==0.4.12
 statsmodels==0.13.1
 wandb
+pytorch-metric-learning

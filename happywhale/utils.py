@@ -12,9 +12,9 @@ import numpy as np
 def get_mlp(input_dim, output_dim, dropout_rate):
     return nn.Sequential(
         nn.Dropout(dropout_rate),
-        nn.Linear(input_dim, input_dim),
-        nn.Tanh(),
         nn.Linear(input_dim, output_dim),
+        nn.ReLU(),
+        nn.Linear(output_dim, output_dim),
     )
 
 
