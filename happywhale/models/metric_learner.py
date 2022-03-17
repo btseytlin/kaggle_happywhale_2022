@@ -71,10 +71,7 @@ class MetricLearner(BaseModel):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        embeddings, loss = self._process_batch(batch, batch_idx)
-        self.log("val_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log("hp_metric", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        return embeddings, loss
+        return None
 
     @torch.no_grad()
     def get_embeddings(self, dl):
