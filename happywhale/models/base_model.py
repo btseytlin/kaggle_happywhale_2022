@@ -110,10 +110,10 @@ class BaseModel(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr)
 
-        num_warmup_steps = self.num_training_steps//2
-        scheduler = get_linear_schedule_with_warmup(optimizer,
-                                                    num_warmup_steps=num_warmup_steps,
-                                                    num_training_steps=self.num_training_steps)
+        # num_warmup_steps = self.num_training_steps//2
+        # scheduler = get_linear_schedule_with_warmup(optimizer,
+        #                                             num_warmup_steps=num_warmup_steps,
+        #                                             num_training_steps=self.num_training_steps)
 
         return {
             'optimizer': optimizer,
