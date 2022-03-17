@@ -83,11 +83,11 @@ class MetricLearner(BaseModel):
             images, labels = batch
             batch_embeddings = self(images)
             embeddings.append(batch_embeddings)
-        embeddings = torch.concat(embeddings)
+        embeddings = torch.cat(embeddings)
         return embeddings
 
     def validation_epoch_end(self, validation_step_outputs):
-        val_embeddings = torch.concat([out[0] for out in validation_step_outputs])[:10]
+        val_embeddings = torch.cat([out[0] for out in validation_step_outputs])[:10]
         val_labels = self.trainer.datamodule.val.labels[:10]
 
         train_embeddings = self.get_embeddings(self.trainer.datamodule.train_dataloader(sampler=False, shuffle=False))[:10]
