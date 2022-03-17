@@ -99,7 +99,8 @@ class MetricLearner(BaseModel):
                                                   reference=train_embeddings,
                                                   reference_labels=train_labels,
                                                   embeddings_come_from_same_source=False)
-
+        print(scores)
+        self.wandb_logger.log_metrics(scores)
         self.log_dict(scores, prog_bar=True, on_epoch=True, logger=True)
         return scores
 
