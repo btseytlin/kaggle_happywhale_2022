@@ -8,3 +8,4 @@ timm==0.4.12
 statsmodels==0.13.1
 wandb
 pytorch-metric-learning
+faiss-cpu

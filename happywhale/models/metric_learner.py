@@ -2,11 +2,13 @@ import os
 import torch
 from pytorch_metric_learning.losses import ContrastiveLoss
 from pytorch_metric_learning.miners import BatchEasyHardMiner
+from pytorch_metric_learning.utils.inference import CustomKNN
 from torch import nn
 import pytorch_lightning as pl
 from pytorch_metric_learning.distances import CosineSimilarity
-
 from happywhale.models.base_model import BaseModel
+from pytorch_metric_learning.utils.accuracy_calculator import AccuracyCalculator
+from tqdm.auto import tqdm
 
 
 class MetricLearner(BaseModel):
@@ -22,6 +24,17 @@ class MetricLearner(BaseModel):
             pos_strategy=BatchEasyHardMiner.EASY,
             neg_strategy=BatchEasyHardMiner.SEMIHARD,
         )
+
+        self.acc_calculator = AccuracyCalculator(
+            include=(
+                'mean_average_precision',
+                'precision_at_1',
+                'mean_average_precision_at_r',
+            ),
+            k="max_bin_count",
+            knn_func=CustomKNN(distance=CosineSimilarity()),
+        )
+
         self.save_hyperparameters()
 
     def load_checkpoint(self, path):
@@ -53,15 +66,39 @@ class MetricLearner(BaseModel):
         return embeddings, loss
 
     def training_step(self, batch, batch_idx):
-        logits, loss = self._process_batch(batch, batch_idx)
+        embeddings, loss = self._process_batch(batch, batch_idx)
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        logits, loss = self._process_batch(batch, batch_idx)
+        embeddings, loss = self._process_batch(batch, batch_idx)
         self.log("val_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log("hp_metric", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        return loss
+        return embeddings, loss
+
+    @torch.no_grad()
+    def get_embeddings(self, dl):
+        embeddings = []
+        for batch in tqdm(dl):
+            images, labels = batch
+            batch_embeddings = self(images)
+            embeddings.append(batch_embeddings)
+        embeddings = torch.concat(embeddings)
+        return embeddings
+
+    def validation_epoch_end(self, validation_step_outputs):
+        val_embeddings = torch.concat([out[0] for out in validation_step_outputs])[:10]
+        val_labels = self.trainer.datamodule.val.labels[:10]
+
+        train_embeddings = self.get_embeddings(self.trainer.datamodule.train_dataloader(sampler=False, shuffle=False))[:10]
+        train_labels = self.trainer.datamodule.train.labels[:10]
+        scores = self.acc_calculator.get_accuracy(query=val_embeddings,
+                                                  query_labels=val_labels,
+                                                  reference=train_embeddings,
+                                                  reference_labels=train_labels,
+                                                  embeddings_come_from_same_source=False)
+        self.log_dict(scores, prog_bar=True, logger=True)
+        return scores
 
     def test_step(self, batch, batch_idx):
         logits, loss = self._process_batch(batch, batch_idx)

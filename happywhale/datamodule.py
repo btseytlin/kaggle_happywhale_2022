@@ -121,19 +121,17 @@ class ImageDataMoodule(pl.LightningDataModule):
                           num_workers=self.num_workers,
                           sampler=sampler)
 
-    def train_dataloader(self, sampler=None):
-        if self.sampler == 'm_per_class':
+    def train_dataloader(self, sampler=None, shuffle=True):
+        sampler = self.sampler if sampler is None else sampler
+        if sampler == 'm_per_class':
             return self._loader_m_per_class(self.train)
 
         return DataLoader(self.train,
                           batch_size=self.batch_size,
                           num_workers=self.num_workers,
-                          shuffle=True)
+                          shuffle=shuffle)
 
     def val_dataloader(self):
-        if self.sampler == 'm_per_class':
-            return self._loader_m_per_class(self.val)
-
         return DataLoader(self.val,
                           batch_size=self.batch_size,
                           num_workers=self.num_workers,

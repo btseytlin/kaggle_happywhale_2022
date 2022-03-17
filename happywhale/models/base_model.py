@@ -43,7 +43,10 @@ class BaseModel(pl.LightningModule):
         weight = torch.FloatTensor(self.class_weights) if self.class_weights is not None else None
         self.loss = nn.CrossEntropyLoss(weight=weight)
 
-        self.wandb_logger = WandbLogger(offline=offline, log_model=True)
+        if offline:
+            self.wandb_logger = WandbLogger(offline=offline)
+        else:
+            self.wandb_logger = WandbLogger(log_model = True)
 
         trainer_kwargs = trainer_kwargs or {}
         trainer_kwargs.update(kwargs)
@@ -114,10 +117,10 @@ class BaseModel(pl.LightningModule):
 
         return {
             'optimizer': optimizer,
-            'lr_scheduler': {
-                'scheduler': scheduler,
-                'interval': 'step',
-            }
+            # 'lr_scheduler': {
+            #     'scheduler': scheduler,
+            #     'interval': 'step',
+            # }
         }
 
     def forward(self, *args, **kwargs):
