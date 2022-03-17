@@ -12,8 +12,8 @@ from happywhale.models.base_model import BaseModel
 class MetricLearner(BaseModel):
     def __init__(self,
                  *args,
-                 pos_margin=0.05,
-                 neg_margin=0.95,
+                 pos_margin=1,
+                 neg_margin=0,
                  **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -71,4 +71,3 @@ class MetricLearner(BaseModel):
     def predict_step(self, batch, batch_idx, dataloader_idx=None):
         logits, loss = self._process_batch(batch, batch_idx)
         return logits
-
