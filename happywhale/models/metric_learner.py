@@ -81,10 +81,7 @@ class MetricLearner(BaseModel):
         embeddings = []
         for batch in tqdm(dl):
             images, labels = batch
-            print(type(images), images.type(), images.shape)
-            print(self.device)
             images = images.to(self.device)
-            print(type(images), images.type())
             batch_embeddings = self(images)
             embeddings.append(batch_embeddings.cpu())
         embeddings = torch.cat(embeddings)
@@ -96,6 +93,8 @@ class MetricLearner(BaseModel):
 
         train_embeddings = self.get_embeddings(self.trainer.datamodule.train_dataloader(sampler=False, shuffle=False))
         train_labels = self.trainer.datamodule.train.labels
+
+        print(val_embeddings.shape, val_labels.shape, train_embeddings.shape, train_labels.shape)
         scores = self.acc_calculator.get_accuracy(query=val_embeddings,
                                                   query_labels=val_labels,
                                                   reference=train_embeddings,
