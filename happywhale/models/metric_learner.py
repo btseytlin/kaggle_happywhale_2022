@@ -88,20 +88,19 @@ class MetricLearner(BaseModel):
         return embeddings
 
     def validation_epoch_end(self, validation_step_outputs):
-        # val_embeddings = torch.cat([out[0] for out in validation_step_outputs])
         val_embeddings = self.get_embeddings(self.trainer.datamodule.val_dataloader())
         val_labels = self.trainer.datamodule.val.labels
 
         train_embeddings = self.get_embeddings(self.trainer.datamodule.train_dataloader(sampler=False, shuffle=False))
         train_labels = self.trainer.datamodule.train.labels
 
-        print(val_embeddings.shape, val_labels.shape, train_embeddings.shape, train_labels.shape)
         scores = self.acc_calculator.get_accuracy(query=val_embeddings,
                                                   query_labels=val_labels,
                                                   reference=train_embeddings,
                                                   reference_labels=train_labels,
                                                   embeddings_come_from_same_source=False)
-        self.log_dict(scores, prog_bar=True, logger=True)
+
+        self.log_dict(scores, prog_bar=True, on_epoch=True, logger=True)
         return scores
 
     def test_step(self, batch, batch_idx):
