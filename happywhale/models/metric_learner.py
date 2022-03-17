@@ -88,7 +88,8 @@ class MetricLearner(BaseModel):
         return embeddings
 
     def validation_epoch_end(self, validation_step_outputs):
-        val_embeddings = torch.cat([out[0] for out in validation_step_outputs])
+        # val_embeddings = torch.cat([out[0] for out in validation_step_outputs])
+        val_embeddings = self.get_embeddings(self.trainer.datamodule.val_dataloader())
         val_labels = self.trainer.datamodule.val.labels
 
         train_embeddings = self.get_embeddings(self.trainer.datamodule.train_dataloader(sampler=False, shuffle=False))
