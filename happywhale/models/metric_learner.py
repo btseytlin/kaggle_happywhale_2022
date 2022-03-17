@@ -81,7 +81,9 @@ class MetricLearner(BaseModel):
         embeddings = []
         for batch in tqdm(dl):
             images, labels = batch
-            batch_embeddings = self(images.to(self.device))
+            images = images.to(self.device)
+            print(images)
+            batch_embeddings = self(images)
             embeddings.append(batch_embeddings.cpu())
         embeddings = torch.cat(embeddings)
         return embeddings
