@@ -1,3 +1,17 @@
+# 19.02.22 - EffnetB0 ArcFace/ArcMargin - submit
+
+Fix label encoder being different across CV splits.
+Replace all own metric learning with Arc margin from https://www.kaggle.com/code/clemchris/pytorch-lightning-arcface-train-infer.
+Add basic inference code. Needs refactoring.
+Removed precision 16.
+First submit.
+
+* CV MAP: ?
+* LB MAP: ?
+* Commit: ?
+* [https://www.kaggle.com/btseytlin/happywhale-metric-effnet-b0/edit](Kaggle notebook)
+* [https://wandb.ai/btseytlin/kaggle_happywhale/runs/2m0o0xkj?workspace=user-btseytlin](Wandb run)
+
 # 17.02.22 - EffnetB0 metric learning
 
 Remake CV to have no test fold. Only train and val.
