@@ -12,7 +12,6 @@ from happywhale.utils import get_mlp
 class BaseModel(pl.LightningModule):
     def __init__(self,
                  backbone=None,
-                 mlp=None,
                  trainer=None,
                  num_training_steps=None,
                  lr=1e-4,
@@ -33,12 +32,6 @@ class BaseModel(pl.LightningModule):
         self.class_weights = class_weights
         self.backbone_embedding_dim = backbone_embedding_dim
         self.backbone = backbone
-
-        self.mlp = mlp or get_mlp(
-            input_dim=self.backbone_embedding_dim,
-            output_dim=self.embedding_size,
-            dropout_rate=dropout,
-        )
 
         weight = torch.FloatTensor(self.class_weights) if self.class_weights is not None else None
         self.loss = nn.CrossEntropyLoss(weight=weight)
@@ -72,7 +65,6 @@ class BaseModel(pl.LightningModule):
             path,
             trainer=self.trainer,
             backbone=self.backbone,
-            mlp=self.mlp,
             lr=self.lr,
             dropout=self.dropout,
             num_training_steps=self.num_training_steps,
@@ -125,8 +117,7 @@ class BaseModel(pl.LightningModule):
 
     def forward(self, *args, **kwargs):
         embeddings = self.backbone(*args, **kwargs)
-        logits = self.mlp(embeddings)
-        return logits
+        return embeddings
 
     def _process_batch(self, batch, batch_idx, **kwargs):
         images, labels = batch

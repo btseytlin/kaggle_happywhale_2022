@@ -66,6 +66,7 @@ class ImageDataMoodule(pl.LightningDataModule):
         batch_size=32,
         num_workers=4,
         sampler=None,
+        label_encoder=None,
         **kwargs,
     ):
         super().__init__()
@@ -73,8 +74,11 @@ class ImageDataMoodule(pl.LightningDataModule):
         self.val_df = val_df
         self.test_df = test_df
 
-        all_individual_ids = pd.concat([train_df, val_df, test_df]).individual_id.values
-        self.label_encoder = LabelEncoder().fit(all_individual_ids)
+        if not label_encoder:
+            all_individual_ids = pd.concat([train_df, val_df, test_df]).individual_id.values
+            self.label_encoder = LabelEncoder().fit(all_individual_ids)
+        else:
+            self.label_encoder = label_encoder
 
         self.train_transforms = train_transforms or default_train_transforms
         self.test_transforms = test_transforms or default_test_transforms
